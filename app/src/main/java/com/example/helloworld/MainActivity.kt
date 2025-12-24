@@ -1,6 +1,7 @@
 package com.example.helloworld
 
 
+import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,12 +33,20 @@ enum class SaveStatus {
     NOT_SAVED, SAVING, SAVED
 }
 
+data class Note(
+    val title: String,
+    val content: String
+)
+
 @Composable
 fun NoteTaking(){
-    val notes = remember { mutableStateListOf("", "") }
+    val notes = remember { mutableStateListOf(
+        Note("", ""),
+        Note("", "")
+    ) }
     var noteIndexCurrent by remember { mutableIntStateOf(0) }
 
-    var saveState = remember { mutableStateOf(SaveStatus.NOT_SAVED) }
+    val saveState = remember { mutableStateOf(SaveStatus.NOT_SAVED) }
 
 
     Column(
@@ -45,12 +54,49 @@ fun NoteTaking(){
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        BasicTextField(
-            value = notes[noteIndexCurrent],
-            onValueChange = {
-                notes[noteIndexCurrent] = it
+        Box(//Title
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            if(notes[noteIndexCurrent].title.isEmpty()){
+                Text("Write Title", color = Color.LightGray, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
-        )
+
+
+            BasicTextField(
+                value = notes[noteIndexCurrent].title,
+                onValueChange = {
+                    notes[noteIndexCurrent] = notes[noteIndexCurrent].copy(title = it)
+                },
+                textStyle = TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            )
+        }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+
+        Box(//Content/Body
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            if(notes[noteIndexCurrent].content.isEmpty()){
+                Text("Write Notes", color = Color.LightGray)
+            }
+
+
+            BasicTextField(
+                value = notes[noteIndexCurrent].content,
+                onValueChange = {
+                    notes[noteIndexCurrent] = notes[noteIndexCurrent].copy(content = it)
+                }
+            )
+        }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         LaunchedEffect(notes[noteIndexCurrent]) {
             saveState.value = SaveStatus.SAVING
@@ -66,7 +112,9 @@ fun NoteTaking(){
             }
         )
 
+
         Spacer(modifier = Modifier.height(16.dp))
+
 
         Button(onClick = {
             noteIndexCurrent = 0
